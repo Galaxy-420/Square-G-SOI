@@ -15,13 +15,18 @@ struct ContentView: View {
                 Text("The Square Game")
                     .font(.title)
                     .padding()
+                    .foregroundColor(.blue)
+                    .bold()
+                    .underline()
                 
                 HStack {
                     Text("High Score: \(highScore)")
-                        .font(.footnote)
+                        .foregroundColor(.red)
+                        .font(.title2)
                     Text("Score: \(score)")
                         .font(.footnote)
                         .padding()
+                        .foregroundColor(.red)
                 }
                 
                 LazyGridView(score: $score, showAlert: $showAlert, gameOver: $gameOver, scores: $scores, highScore: $highScore)
@@ -83,7 +88,7 @@ struct LazyGridView: View {
     @Binding var scores: [ScoreEntry]
     @Binding var highScore: Int
     
-    @State private var selectedColors: [NamedColor] = []
+    @State private var selectedColors: [(id: UUID, color: NamedColor)] = []
     @State private var colors: [NamedColor] = []
     
     let columns = Array(repeating: GridItem(.fixed(100), spacing: 10), count: 3)
@@ -122,19 +127,25 @@ struct LazyGridView: View {
                         .frame(height: 100)
                         .cornerRadius(8)
                 }
+                .id(namedColor.id) // Use ID to identify buttons
             }
         }
         .padding()
     }
     
     func handleSelection(namedColor: NamedColor) {
-        selectedColors.append(namedColor)
+        selectedColors.append((id: namedColor.id, color: namedColor))
         
         if selectedColors.count == 2 {
-            if selectedColors[0].name == selectedColors[1].name {
+            let firstSelection = selectedColors[0]
+            let secondSelection = selectedColors[1]
+            
+            if firstSelection.color.name == secondSelection.color.name && firstSelection.id != secondSelection.id {
+                // Correct match (different buttons, same color)
                 score += 1
                 shuffleColors()
             } else {
+                // Incorrect match or same button clicked twice
                 if score > highScore {
                     highScore = score
                 }
